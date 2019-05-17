@@ -1,0 +1,36 @@
+<html>
+<head>
+	<script src="/jquery/jquery.js"></script>
+
+</head>
+<body>
+<h1>test</h1>
+<div id='infoBox'>
+</div>
+
+<script>
+
+	function refreshInfo(){
+		let infoBox = $('#infoBox')
+		serverJSONRequest('/getInfo','GET',function(res){
+			infoBox.empty()
+			infoBox.append('<pre>' + JSON.stringify(res, null, 2) + '</pre>')
+		})
+	}
+
+	window.setInterval(refreshInfo,1000);
+
+	function serverJSONRequest(url, type, s){
+		$.ajax({
+	        url: url,
+	        type: type,
+	        dataType: 'json', 
+	        success: s
+	    });
+	}
+
+	
+
+</script>
+</body>
+</html>
