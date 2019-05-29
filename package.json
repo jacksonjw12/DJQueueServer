@@ -4,9 +4,11 @@
   "description": "DJQueue",
   "main": "index.js",
   "dependencies": {
+    "@microlink/youtube-dl": "^2.0.0",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "express-socket.io-session": "^1.3.5",
+    "howler": "^2.1.2",
     "jquery": "^3.3.1",
     "node-emoji": "^1.8.1",
     "socket.io": "^2.2.0"

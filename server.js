@@ -5,7 +5,12 @@ var app = express();
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 //var requestHandlers = require("./requestHandlers");
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var youtubedl = require('@microlink/youtube-dl');
+const {Howl, Howler} = require('howler');
+
+//testing...
+var url = "https://www.youtube.com/watch?v=6ONRf7h3Mdk";
 
 function start() {
 
@@ -35,19 +40,39 @@ function start() {
 	app.get('/', function (req, res) {
 		res.sendFile(__dirname + '/html/index.html')
 	});
-	let sentInfo = {};
+
+	
 	app.get('/sendInfo',function(req,res){
 		console.log(JSON.stringify(req.query));
-		sentInfo = req.query
+		sentInfo.push(req.query);
 		res.send({})
 	})
 
-	
+	let sentInfo = [];
 	app.get('/getInfo',function(req, res){
 		//testData.push({"dataNum":testData.length})
 		res.send({"data":sentInfo});
 	})
 
+	app.get('/play', function(req, res) {
+		youtubedl.exec(url, ['-x', '--audio-format', 'aac'], {}, function exec (
+			err,
+			output
+		  ) {
+			'use strict'
+			if (err) {
+			  throw err
+			}
+			console.log(output.join('\n'))
+		  })
+
+		//   var sound = new Howl({
+		// 	src: ['Travis Scott - SICKO MODE ft. Drake-6ONRf7h3Mdk.aac']
+		//   });
+		  
+		//   sound.play();
+		res.send("playing...");
+	});
 
 	//app.get('/listRooms',requestHandlers.listRooms)
 
