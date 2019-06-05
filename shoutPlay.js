@@ -4,16 +4,23 @@ const nodeshout = require("nodeshout-master");
 const Writable = require('stream').Writable;
 const EventEmitter = require('events');
 const fs = require("fs");
+const request = require('request')
+const url = require('url')
 var youtubedl = require('@microlink/youtube-dl');
+var ytdl = require('@microlink/youtube-dl').ytdl;
 
 
 
 nodeshout.init();
 
 
+
 function getYoutubeMP3(url, callback){
     let name = "";
-
+    console.log("blah")
+    youtubedl.getInfo(url, function(err, info){
+        console.log(info._duration_hms)
+    })
     youtubedl.exec(url, ['-x','--audio-format', 'mp3', '-o', 'songs/%(title)s.%(ext)s'], {}, 
         function exec (err, outputs) {
             if (err) {
@@ -49,7 +56,8 @@ function deleteSong(filepath){
 class Player {
     constructor(){
         this.songs = []
-
+        this.oldSongs = []
+        
 
         this.shout = nodeshout.create();
 
@@ -76,7 +84,7 @@ class Player {
     playNext(){
         let self = player;
         console.log("finished song")
-
+        // setTimeout(()=>{console.log("-----should be done---"),13000})
         if(self.songs.length){
             let currentSong = self.songs.shift();
             currentSong.beginStream();

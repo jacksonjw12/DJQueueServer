@@ -76,6 +76,10 @@ function start() {
 	app.use(express.static(__dirname + '/public/js'));
 	app.use(express.static(__dirname + '/public/css'));
 
+
+
+	app.use('/songs', express.static(__dirname + '/songs'));
+
 	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 
@@ -112,6 +116,18 @@ function start() {
 
 
 		res.send({"info":"added song: " + req.songURL + " to the queue"})
+	})
+
+
+	app.get('/getStream.m3u', function(req, res){
+		let hostname = "http://localhost:8081/songs"
+		let playlistFile = "#EXTM3U\n";
+		//hostname += player.getSongPlaylist
+		playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
+		playlistFile+=hostname+"blank.mp3" + "\n"
+
+		res.header({ 'Content-Disposition': 'attachment; filename=stream.m3u' }).send(playlistFile);
+
 	})
 
 	
