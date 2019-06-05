@@ -1,22 +1,21 @@
-// var url = require("url");
 var http = require('http');
 var express = require('express');
 var app = express();
 var server = http.createServer(app);
 var bodyParser = require('body-parser')
-//var requestHandlers = require("./requestHandlers");
-// const {Howl, Howler} = require('howler');
+
+
+
 var player = require('./shoutPlay');
 
-var nodeshout = require('nodeshout-master'),
-	FileReadStream = require('nodeshout-master').FileReadStream,
-    ShoutStream = require('nodeshout-master').ShoutStream,
-    fs = require('fs')
+var fs = require('fs')
 const Writable = require('stream').Writable;
 const EventEmitter = require('events');
 
 //testing...
 var countDownUrl = "https://www.youtube.com/watch?v=EIpBgNtUYQE";
+
+
 
 
 
@@ -61,14 +60,19 @@ var countDownUrl = "https://www.youtube.com/watch?v=EIpBgNtUYQE";
 
 function start() {
 
+	let port = 8081;
+	let hostname = "http://localhost:8081/";
+	if(process.platform === "linux"){
+		port = 8081;
+		hostname = "http://play.jacksonwheelers.space/";
+	}
 	
 	
 	
-	//app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 	  extended: true
 	}));
-	//var json = require('express-json');
+	
 	app.use(bodyParser.json());
 
 	app.use('/static', express.static('node_modules'));
@@ -103,6 +107,10 @@ function start() {
 		//testData.push({"dataNum":testData.length})
 		res.send({"data":sentInfo});
 	})
+	app.get('/getQueue',function(req, res){
+		//testData.push({"dataNum":testData.length})
+		res.send({"songs":player.songs});
+	})
 
 	app.get('/playCountDown', function(req, res){
 		player.createSong(countDownUrl);
@@ -116,25 +124,37 @@ function start() {
 
 
 		res.send({"info":"added song: " + req.songURL + " to the queue"})
-	})
+	});
 
 
-	let port = 8081;
-	let hostname = "http://localhost:8081/songs/"
-	if(process.platform === "linux"){
-		port = 8081
-		hostname = "http://dj.jacksonwheelers.space/songs/"
-	}
+
+	
 
 	app.get('/getStream.m3u', function(req, res){
 		
 		let playlistFile = "#EXTM3U\n";
-		//hostname += player.getSongPlaylist
-		playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
-		playlistFile+=hostname+"blank.mp3" + "\n"
+		playlistFile += player.getSongPlaylist(hostname)
+		// playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
+		// playlistFile+=hostname+"blank.mp3" + "\n"
+
 
 		res.header({ 'Content-Disposition': 'attachment; filename=stream.m3u' }).send(playlistFile);
 
+	})
+	app.get('/getStream.json', function(req, res){
+		
+		let playlistFile = "#EXTM3U\n";
+		playlistFile += player.getSongPlaylist(hostname)
+		// playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
+		// playlistFile+=hostname+"blank.mp3" + "\n"
+
+
+		res.send({ "m3u": playlistFile });
+
+	})
+
+	app.get('/emptySong*', function(req, res){
+		res.sendFile(__dirname + '/songs/blank.mp3')
 	})
 
 	

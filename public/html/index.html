@@ -5,16 +5,34 @@
 </head>
 <body>
 <h1>test</h1>
+
+<button onclick="javascript:addSong()">Add Song</button>
+
 <div id='infoBox'>
+</div>
+
+<div id='playlistBox'>
 </div>
 
 <script>
 
 	function refreshInfo(){
 		let infoBox = $('#infoBox')
-		serverJSONRequest('/getInfo','GET',function(res){
+		serverJSONRequest('/getQueue','GET',function(res){
 			infoBox.empty()
 			infoBox.append('<pre>' + JSON.stringify(res, null, 2) + '</pre>')
+		})
+		let playlistBox = $('#playlistBox')
+		serverJSONRequest('/getStream.json','GET', function(res){
+			playlistBox.empty()
+			let str = res.m3u.replace(/(?:\r\n|\r|\n)/g, '<br>');
+			playlistBox.append( str )
+			
+		})
+	}
+	function addSong(){
+		serverJSONRequest('/playCustomSong?songURL=Cl8a9b76GMg','GET',function(res){
+			console.log("added song")
 		})
 	}
 
@@ -25,9 +43,12 @@
 	        url: url,
 	        type: type,
 	        dataType: 'json', 
-	        success: s
+	        success: s,
+	        error: console.log
 	    });
 	}
+
+	refreshInfo();
 
 	
 
