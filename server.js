@@ -120,10 +120,10 @@ function start() {
 
 
 	let port = 8081;
-	let hostname = "http://localhost:8081/songs"
+	let hostname = "http://localhost:8081/songs/"
 	if(process.platform === "linux"){
 		port = 8081
-		hostname = "http://dj.jacksonwheelers.space/songs"
+		hostname = "http://dj.jacksonwheelers.space/songs/"
 	}
 
 	app.get('/getStream.m3u', function(req, res){
