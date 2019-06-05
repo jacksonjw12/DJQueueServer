@@ -119,8 +119,15 @@ function start() {
 	})
 
 
+	let port = 8081;
+	let hostname = "http://localhost:8081/songs"
+	if(process.platform === "linux"){
+		port = 8081
+		hostname = "http://dj.jacksonwheelers.space/songs"
+	}
+
 	app.get('/getStream.m3u', function(req, res){
-		let hostname = "http://localhost:8081/songs"
+		
 		let playlistFile = "#EXTM3U\n";
 		//hostname += player.getSongPlaylist
 		playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
@@ -132,10 +139,7 @@ function start() {
 
 	
 
-	var port = 8081;
-	if(process.platform === "linux"){
-		port = 8081
-	}
+	
 
 	server.listen(port);
 
