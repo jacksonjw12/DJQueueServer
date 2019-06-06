@@ -34,18 +34,25 @@ class Database {//datbase controller
         this.playlistRef.on('child_added', (data) => {
             
             if(this.player !== undefined){
-                if(this.player.stopped){
-                    //init as upNext
-                    this.setupNextSong(()=>{
 
-                        //this.player.start();
+                this.getData((activeSong, upNext, prevSong, playlist=[])=>{
+
+                    if(this.player.stopped && upNext === undefined){
+                        //init as upNext
+                        this.setupNextSong(()=>{
+                            
+                            //this.player.start();
 
 
 
-                    })
+                        })
 
 
-                }
+                    }
+
+                })
+
+
             }
 
         })
@@ -152,10 +159,13 @@ class Database {//datbase controller
             if(activeSong !== undefined ){
                 
                 this.setActiveAsLastPlayed(()=>{
-                    this.activeSong.set(upNext);
-                    this.upNext.set({});
+                    if(upNext !== undefined){
+                        this.activeSong.set(upNext);
+                    }
+                    this.upNext.set({})
+
                     callback();
-                })
+                    })
                 
 
             }
