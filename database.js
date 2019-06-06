@@ -262,20 +262,20 @@ class Database {//datbase controller
             image: "https://i.ytimg.com/vi/IwLSrNu1ppI/hqdefault.jpg",
             addedAt: (new Date().getTime()-1000)
         })
-        this.playlistRef.push({
-            title: "Lupe Fiasco - The Show Goes On",
-            url: "Rmp6zIr5y4U",
-            count: 2,
-            image: "https://i.ytimg.com/vi/Rmp6zIr5y4U/hqdefault.jpg",
-            addedAt: (new Date().getTime()-1000)
-        })
-        this.playlistRef.push({
-            title: "Young Thug - The London (ft. J. Cole &amp; Travis Scott) [Official Audio]",
-            url: "OKhT_6XtD7I",
-            count: 0,
-            image: "https://i.ytimg.com/vi/OKhT_6XtD7I/hqdefault.jpg",
-            addedAt: (new Date().getTime()-1000)
-        })
+        // this.playlistRef.push({
+        //     title: "Lupe Fiasco - The Show Goes On",
+        //     url: "Rmp6zIr5y4U",
+        //     count: 2,
+        //     image: "https://i.ytimg.com/vi/Rmp6zIr5y4U/hqdefault.jpg",
+        //     addedAt: (new Date().getTime()-1000)
+        // })
+        // this.playlistRef.push({
+        //     title: "Young Thug - The London (ft. J. Cole &amp; Travis Scott) [Official Audio]",
+        //     url: "OKhT_6XtD7I",
+        //     count: 0,
+        //     image: "https://i.ytimg.com/vi/OKhT_6XtD7I/hqdefault.jpg",
+        //     addedAt: (new Date().getTime()-1000)
+        // })
     }
     clearPlaylist(){
         this.playlistRef.remove();
