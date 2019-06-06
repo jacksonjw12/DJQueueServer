@@ -212,7 +212,8 @@ class Player {
         let playlistFile = ""
 
         if(this.activeSong !== undefined){
-            playlistFile += hostname + encodeURIComponent(this.activeSong.filepath);
+
+            playlistFile += hostname + this.activeSong.filepath;
         }
         else{
             playlistFile += hostname + encodeURIComponent("emptySong" + (new Date().getTime()));
