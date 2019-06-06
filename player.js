@@ -163,14 +163,14 @@ class Player {
 
             this.activeSong = this.songs.shift();
            
-            // setTimeout(this.database.setupNextSong, this.activeSong.duration/2);
+            setTimeout(this.database.setupNextSong, this.activeSong.duration/2);
             
-            // setTimeout(this.start, this.activeSong.duration);
+            setTimeout(this.start, this.activeSong.duration);
 
 
-            setTimeout(()=>{this.database.setupNextSong(()=>{this.start()})}, 2500);
+            // setTimeout(()=>{this.database.setupNextSong(()=>{this.start()})}, 2500);
             
-            setTimeout(()=>{this.start}, 5000);
+            // setTimeout(()=>{this.start}, 5000);
 
         }
         else{
