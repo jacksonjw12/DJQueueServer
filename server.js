@@ -169,8 +169,8 @@ function start() {
 
 	})
 
-	app.get('/emptySong:timestamp', function(req, res){
-		res.setHeader('Content-Disposition', 'attachment; filename=' + "emptySong"+req.params.timestamp + ".mp3");
+	app.get('/emptySong', function(req, res){
+		res.setHeader('Content-Disposition', 'filename=' + "emptySong"+req.params.timestamp + ".mp3");
 		// res.setHeader('Content-Transfer-Encoding', 'binary');
         res.setHeader('Content-Type', 'application/mpeg');
 
