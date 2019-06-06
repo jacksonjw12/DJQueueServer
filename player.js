@@ -10,6 +10,8 @@ var ytdl = require('@microlink/youtube-dl').ytdl;
 
 var database = require('./database');
 
+var ffmpeg = require('ffmpeg');
+
 database.clearPlaylist();
 //database.createDummyValues();
 
@@ -71,7 +73,7 @@ function step(){
 
 
 
-
+const segmentSize = 20;//20 seconds segments
 
 function getYoutubeMP3(url, callback){
     let name = "";
@@ -99,7 +101,39 @@ function getYoutubeMP3(url, callback){
                 for(output of outputs){
                     if(output.indexOf("Deleting") == 0){
                         if(name != ""){
+
+//                             let segments = Math.ceil(duration * 1000/20)
+//                             let currentTime = 0;
+//                             for(let i = 0; i< segments; i++){
+//                                 let songNameWithoutExt = name.split(".")[0]
+//                                 var songSource = new ffmpeg(name);
+//                                 songSource.then(function (songffmpeg) {
+// // -i 1559812658755.mp3 -c copy -map 0 -segment_time 00:20:00 -f segment output%03d.mp3                                    
+//                                     songffmpeg
+//                                         .addCommand('-c', 'copy');
+//                                         .addCommand('-map', 0);
+//                                         .addCommand('-segment_time', '00:20:00');
+//                                         .addCommand('-f', 'segment');
+//                                         .addCommand('-reset_timestamps 1', songNameWithoutExt+'-%03d.');
+
+
+
+//                                         // .save('/path/to/save/your_movie.avi', function (error, file) {
+//                                         //     if (!error)
+//                                         //         console.log('Video file: ' + file);
+//                                         // });
+
+//                                     }, function (err) {
+//                                         console.log('Error: ' + err);
+//                                 });
+
+//                             }
+
+
+
                             callback(name, duration);
+
+
                         }
                         else{
                             throw "bad video name"
@@ -222,6 +256,27 @@ class Player {
             // }
  
         });
+    }
+    getSongURI(hostname){
+        //
+        //
+        // playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
+        // playlistFile+=hostname+"blank.mp3" + "\n"
+
+       
+
+        if(this.activeSong !== undefined){
+
+            return hostname + this.activeSong.filepath;
+        }
+        else{
+            return hostname + encodeURIComponent("countdown.mp3");// + (new Date().getTime()));
+        }
+
+        
+
+
+
     }
 
     getSongPlaylist(hostname){

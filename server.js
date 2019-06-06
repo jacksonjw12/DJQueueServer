@@ -144,7 +144,16 @@ function start() {
 
 
 
-	
+	app.get('/getCurrentSong', function(req, res){
+		
+		
+		// playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
+		// playlistFile+=hostname+"blank.mp3" + "\n"
+
+
+		res.send({'uri':player.getSongURI(hostname)});
+
+	})
 
 	app.get('/getStream.m3u', function(req, res){
 		
