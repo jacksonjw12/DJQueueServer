@@ -169,7 +169,11 @@ function start() {
 
 	})
 
-	app.get('/emptySong*', function(req, res){
+	app.get('/emptySong:timestamp', function(req, res){
+		res.setHeader('Content-Disposition', 'attachment; filename=' + "emptySong"+req.params.timestamp + ".mp3");
+		// res.setHeader('Content-Transfer-Encoding', 'binary');
+        res.setHeader('Content-Type', 'application/mpeg');
+
 		res.sendFile(__dirname + '/blank.mp3')
 	})
 
