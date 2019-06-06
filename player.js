@@ -90,7 +90,7 @@ function getYoutubeMP3(url, callback){
         }
 
         let timestamp = (new Date().getTime())
-        youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3', '-o', 'songs/%(title)s' + timestamp + '.%(ext)s'], {}, 
+        youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3', '-o', 'songs/' + timestamp + '.%(ext)s'], {}, 
             function exec (err, outputs) {
                 if (err) {
                     throw err
