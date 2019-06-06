@@ -237,7 +237,7 @@ class Player {
             playlistFile += hostname + this.activeSong.filepath;
         }
         else{
-            playlistFile += hostname + encodeURIComponent("emptySong.mp3");// + (new Date().getTime()));
+            playlistFile += hostname + encodeURIComponent("countdown.mp3");// + (new Date().getTime()));
         }
 
         return playlistFile;
