@@ -6,9 +6,10 @@ var bodyParser = require('body-parser')
 
 
 
-var player = require('./shoutPlay');
 
 var fs = require('fs')
+const path = require('path');
+
 const Writable = require('stream').Writable;
 const EventEmitter = require('events');
 
@@ -16,6 +17,21 @@ const EventEmitter = require('events');
 var countDownUrl = "https://www.youtube.com/watch?v=EIpBgNtUYQE";
 
 
+const directory = 'songs';
+
+
+fs.readdir(directory, (err, files) => {
+  if (err) throw err;
+
+  for (const file of files) {
+    fs.unlink(path.join(directory, file), err => {
+      if (err) throw err;
+    });
+  }
+});
+
+//essentially main
+var player = require('./player');
 
 
 
@@ -154,7 +170,7 @@ function start() {
 	})
 
 	app.get('/emptySong*', function(req, res){
-		res.sendFile(__dirname + '/songs/blank.mp3')
+		res.sendFile(__dirname + '/blank.mp3')
 	})
 
 	
