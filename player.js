@@ -10,7 +10,6 @@ var ytdl = require('@microlink/youtube-dl').ytdl;
 
 var database = require('./database');
 
-var ffmpeg = require('ffmpeg');
 
 database.clearPlaylist();
 //database.createDummyValues();
