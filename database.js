@@ -38,7 +38,7 @@ class Database {//datbase controller
                     //init as upNext
                     this.setupNextSong(()=>{
 
-                        this.player.start();
+                        //this.player.start();
 
 
 
@@ -97,7 +97,7 @@ class Database {//datbase controller
     }
 
 
-    setupNextSong(callback, skipUpNext=false){
+    setupNextSong(callback=()=>{}, skipUpNext=false){
         if(this.player === undefined){
             console.log("setupNextSong: player not set")
             return;
@@ -124,7 +124,16 @@ class Database {//datbase controller
         });
     }
     
-    
+    setActiveAsLastPlayed(callback=()=>{}){
+        this.getData((activeSong, upNext, prevSong, playlist=[])=>{
+            if(activeSong !== undefined ){
+                this.lastPlayed.set(activeSong);
+                this.activeSong.set({})
+
+            }
+            callback();
+        })
+    }
     setActiveSong(callback=()=>{}){
         console.log("setting active song")
         if(this.player === undefined){
@@ -141,35 +150,24 @@ class Database {//datbase controller
             // console.log("______________")
             
             if(activeSong !== undefined ){
-                this.lastPlayed.set(activeSong);
+                
+                this.setActiveAsLastPlayed(()=>{
+                    this.activeSong.set(upNext);
+                    this.upNext.set({});
+                    callback();
+                })
+                
+
             }
+            else{
+                if(upNext !== undefined){
+                    this.activeSong.set(upNext);
+                }
+                this.upNext.set({})
 
+                callback();
 
-            this.activeSong.set(upNext);
-            this.upNext.set({})
-
-                // if(prevSong !== undefined){
-                //     this.player.removeSong(prevSong);
-                // }
-                
-            //this.activeSong.set({});
-            //}
-            //use the setup next function to create and play the song
-            // if(upNext === undefined && playlist.length){
-            //     this.setupNextSong(()=>{
-
-            //         callback();
-            //     },true);
-
-            // }
-            // else if(upNext !== undefined){
-            //     this.activeSong.set(upNext);
-            //     this.upNext.set({})
-                
-            // }
-            callback();
-
-            //this.getUpNext()
+            }
 
 
         })

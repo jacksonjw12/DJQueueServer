@@ -132,19 +132,41 @@ class Player {
 
         //this.blank.beginStream();
         console.log("in player")
-        this.database.setupNextSong(()=>{
-            setTimeout(()=>{this.start()},2000)
-            //this.start();
-        })
+        this.database.setupNextSong()
         
     }
 
     start(){
+        if(this.songs.length === 0){
+            console.log("START: no song in nextup")
+            this.stopped = true;
+            return;
+        }
+
         this.stopped = false;
         // console.log(this)
-        console.log("start:")
+        console.log("START: playing next up")
         this.playNextUp();
         this.database.setActiveSong();
+    }
+    finishPlaying(){
+        if(this.activeSong !== undefined){
+
+
+            console.log("FINISH PLAYING: song is done")
+
+            this.removeSong(this.prevSong);
+            this.prevSong = this.activeSong
+            this.activeSong = undefined;
+
+            this.database.setActiveAsLastPlayed();
+
+
+            this.start();
+        }
+        else{
+            console.log("FINISH PLAYING: somehow a song finished that did not exist")
+        }
     }
 
     //on
@@ -152,21 +174,16 @@ class Player {
         let self = player;
         
         
-        if(this.activeSong !== undefined){
-            console.log(1)
-            this.removeSong(this.prevSong);
-            this.prevSong = this.activeSong
-            this.activeSong = undefined;
-        }
+        
 
         //if another song is ready to go, set it as the active song
         if(this.songs.length){
 
             this.activeSong = this.songs.shift();
+            console.log("PLAY NEXT UP: setting timeoutes: ", this.activeSong.duration)
+            setTimeout(()=>{this.database.setupNextSong(()=>{})},  this.activeSong.duration/2);
             
-            setTimeout(()=>{this.database.setupNextSong(()=>{this.start()})},  this.activeSong.duration/2);
-            
-            setTimeout(()=>{this.start()}, this.activeSong.duration);
+            setTimeout(()=>{this.finishPlaying()}, this.activeSong.duration);
 
 
             // setTimeout(()=>{this.database.setupNextSong(()=>{this.start()})}, 2500);
@@ -175,7 +192,7 @@ class Player {
 
         }
         else{
-            console.log("the player stopped")
+            console.log("PLAY NEXT UP: the player stopped")
             this.stopped = true;
             //attempt to load another song 
             //setTimeout(this.database.setupNextSong, 1000);
@@ -196,6 +213,9 @@ class Player {
             song.duration = duration;
             // song.events.on("finish", self.playNext);
             this.songs.push(song);
+            if(this.stopped){
+                this.start();
+            }
             callback();
             // if(this.activeSong == undefined){
             //     self.playNext();
