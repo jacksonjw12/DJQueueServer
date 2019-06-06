@@ -11,7 +11,7 @@ var ytdl = require('@microlink/youtube-dl').ytdl;
 var database = require('./database');
 
 database.clearPlaylist();
-database.createDummyValues();
+//database.createDummyValues();
 
 // database.getPlaylist(function(playlist){
 //     console.log(playlist);
