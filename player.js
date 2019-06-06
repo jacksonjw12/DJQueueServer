@@ -140,6 +140,7 @@ class Player {
     }
 
     start(){
+        this.stopped = false;
         // console.log(this)
         console.log("start:")
         this.playNextUp();

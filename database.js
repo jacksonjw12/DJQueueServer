@@ -37,8 +37,8 @@ class Database {//datbase controller
                 if(this.player.stopped){
                     //init as upNext
                     this.setupNextSong(()=>{
-                        
-                        player.start();
+
+                        this.player.start();
 
 
 
