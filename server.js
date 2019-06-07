@@ -185,6 +185,11 @@ function start() {
 
 		res.sendFile(__dirname + '/blank.mp3')
 	})
+	app.get('/ready.mp3', function(req, res){
+		
+		res.sendFile(__dirname + '/ready.mp3')
+	})
+
 	app.get('/countdown*.mp3', function(req, res){
 		// res.setHeader('Content-Disposition', 'filename=' + "emptySong"+req.params.timestamp + ".mp3");
 		// res.setHeader('Content-Transfer-Encoding', 'binary');
