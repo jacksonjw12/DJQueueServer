@@ -269,6 +269,7 @@ class Player {
             return hostname + this.activeSong.filepath;
         }
         else{
+            console.log(hostname + encodeURIComponent("countdown" + (new Date().getTime()))+ ".mp3"))
             return hostname + encodeURIComponent("countdown" + (new Date().getTime()))+ ".mp3");// + (new Date().getTime()));
         }
 
