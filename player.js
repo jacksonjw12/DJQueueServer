@@ -96,7 +96,7 @@ function getYoutubeMP3(url, callback){
         let nameIdentifier = 'songs/' + timestamp;
 
 
-        youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3','--postprocessor-args' ,"-ar 48000 -b:a 64k", '-o', nameIdentifier + '-u.%(ext)s'], {}, 
+        youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3','--postprocessor-args' ,"-ar 48000 -b:a 130K", '-o', nameIdentifier + '-u.%(ext)s'], {}, 
             function exec (err, outputs) {
                 if (err) {
                     throw err
@@ -106,7 +106,7 @@ function getYoutubeMP3(url, callback){
                     if(output.indexOf("Deleting") == 0){
                         if(name != ""){
                             
-                            let ffmpeg = spawn('ffmpeg', ['-i', name, '-hide_banner','-loglevel','panic','-ar', '48000','-b:a','64k' , nameIdentifier+'.mp3']);
+                            let ffmpeg = spawn('ffmpeg', ['-i', name, '-hide_banner','-loglevel','panic','-ar', '48000','-b:a','130K' , nameIdentifier+'.mp3']);
                             ffmpeg.on('exit', (statusCode) => {
                               if (statusCode === 0) {
                                  console.log('conversion successful')
