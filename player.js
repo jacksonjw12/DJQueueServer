@@ -269,7 +269,7 @@ class Player {
             return hostname + this.activeSong.filepath;
         }
         else{
-            return hostname + encodeURIComponent("countdown.mp3");// + (new Date().getTime()));
+            return hostname + encodeURIComponent("countdown" + (new Date().getTime()))+ ".mp3");// + (new Date().getTime()));
         }
 
         
