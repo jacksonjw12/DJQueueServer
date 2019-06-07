@@ -106,7 +106,7 @@ function getYoutubeMP3(url, callback){
                     if(output.indexOf("Deleting") == 0){
                         if(name != ""){
                             
-                            let ffmpeg = spawn('ffmpeg', ['-i', name, '-hide_banner','-loglevel','panic','-ar', '48000','-b:a','192K' , nameIdentifier+'.mp3']);
+                            let ffmpeg = spawn('ffmpeg', ['-i', name, '-hide_banner','-loglevel','panic','-ar', '48000','-b:a','256K' , nameIdentifier+'.mp3']);
                             ffmpeg.on('exit', (statusCode) => {
                               if (statusCode === 0) {
                                  console.log('conversion successful')
