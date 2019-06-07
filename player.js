@@ -8,6 +8,7 @@ const url = require('url')
 var youtubedl = require('@microlink/youtube-dl');
 var ytdl = require('@microlink/youtube-dl').ytdl;
 
+const spawn = require('child_process').spawn;
 var database = require('./database');
 
 
@@ -91,7 +92,11 @@ function getYoutubeMP3(url, callback){
         }
 
         let timestamp = (new Date().getTime())
-        youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3','--postprocessor-args' ,"-r 48000", '-o', 'songs/' + timestamp + '.%(ext)s'], {}, 
+
+        let nameIdentifier = 'songs/' + timestamp;
+
+
+        youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3','--postprocessor-args' ,"-ar 48000 -b:a 64k", '-o', nameIdentifier + '-u.%(ext)s'], {}, 
             function exec (err, outputs) {
                 if (err) {
                     throw err
@@ -100,37 +105,26 @@ function getYoutubeMP3(url, callback){
                 for(output of outputs){
                     if(output.indexOf("Deleting") == 0){
                         if(name != ""){
+                            
+                            let ffmpeg = spawn('ffmpeg', ['-i', name, '-hide_banner','-loglevel','panic','-ar', '48000','-b:a','64k' , nameIdentifier+'.mp3']);
+                            ffmpeg.on('exit', (statusCode) => {
+                              if (statusCode === 0) {
+                                 console.log('conversion successful')
+                                 player.removeSong({"filepath":name})
+                                 callback(nameIdentifier + '.mp3', duration);
+                              }
+                            })
 
-//                             let segments = Math.ceil(duration * 1000/20)
-//                             let currentTime = 0;
-//                             for(let i = 0; i< segments; i++){
-//                                 let songNameWithoutExt = name.split(".")[0]
-//                                 var songSource = new ffmpeg(name);
-//                                 songSource.then(function (songffmpeg) {
-// // -i 1559812658755.mp3 -c copy -map 0 -segment_time 00:20:00 -f segment output%03d.mp3                                    
-//                                     songffmpeg
-//                                         .addCommand('-c', 'copy');
-//                                         .addCommand('-map', 0);
-//                                         .addCommand('-segment_time', '00:20:00');
-//                                         .addCommand('-f', 'segment');
-//                                         .addCommand('-reset_timestamps 1', songNameWithoutExt+'-%03d.');
-
-
-
-//                                         // .save('/path/to/save/your_movie.avi', function (error, file) {
-//                                         //     if (!error)
-//                                         //         console.log('Video file: ' + file);
-//                                         // });
-
-//                                     }, function (err) {
-//                                         console.log('Error: ' + err);
-//                                 });
-
-//                             }
+                            ffmpeg
+                              .stderr
+                              .on('data', (err) => {
+                                console.log('err:', new String(err))
+                                throw "bad ffmpeg conversion"
+                              })
 
 
 
-                            callback(name, duration);
+                            
 
 
                         }
@@ -311,6 +305,7 @@ class Player {
                         console.error(err);
                     }
                 });
+
             }, song.duration)
             
         }
