@@ -1,25 +1,20 @@
+//Jackson Wheeler 
 var http = require('http');
 var express = require('express');
 var app = express();
 var server = http.createServer(app);
 var bodyParser = require('body-parser')
-
-
-
-
 var fs = require('fs')
 const path = require('path');
-
 const Writable = require('stream').Writable;
 const EventEmitter = require('events');
 
 //testing...
 var countDownUrl = "https://www.youtube.com/watch?v=EIpBgNtUYQE";
 
-
 const directory = 'songs';
 
-
+//start by clearing the songs directory, removing things not properly deleted in last shutdown
 fs.readdir(directory, (err, files) => {
   if (err) throw err;
 
@@ -30,49 +25,11 @@ fs.readdir(directory, (err, files) => {
   }
 });
 
-//essentially main
+
+
+//essentially the main for DJQueue service
 var player = require('./player');
 
-
-
-
-
-
-// function playCountdown(name){
-// 	var shout = nodeshout.create();
-// 	shout.setHost('play.jacksonwheelers.space');
-// 	shout.setPort(8000);
-// 	shout.setUser('source');
-// 	shout.setPassword('jackson123');
-// 	shout.setMount('stream');
-// 	shout.setFormat(1); // 0=ogg, 1=mp3
-// 	shout.setAudioInfo('bitrate', '192');
-// 	shout.setAudioInfo('samplerate', '44100');
-// 	shout.setAudioInfo('channels', '2');
-// 	shout.open();
-
-// 	let done = false;
-	
-// 	let player = new Player(shout, name);
-// 	player.events.on("finish", ()=>{
-// 	  // Do something (e.g.: play next song)
-// 	  console.log("finished")
-// 	  player.replay();
-	  
-
-// 	});
-// 	player.events.on("error", (error)=>{
-// 	  // An error happened, oh no
-// 	  console.warn(error);
-// 	});
-
-// 	player.beginStream();
-
-	
-	
-// }
-
-// let player = new Player();
 
 function start() {
 
@@ -95,36 +52,43 @@ function start() {
 	app.use(express.static(__dirname + '/public/html'));
 	app.use(express.static(__dirname + '/public/js'));
 	app.use(express.static(__dirname + '/public/css'));
-
-
-
-	app.use('/songs', express.static(__dirname + '/songs'));
-
 	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 
-	
-	
+	//expose the songs directory so that the ESP32 can request them
+	app.use('/songs', express.static(__dirname + '/songs'));
 
-
+	
 	app.get('/', function (req, res) {
 		res.sendFile(__dirname + '/html/index.html')
 	});
 
-	
-	app.get('/sendInfo',function(req,res){
-		console.log(JSON.stringify(req.query));
-		sentInfo.push(req.query);
-		res.send({})
+
+	//the ESP32 calls this to get the song url it should play
+	app.get('/getCurrentSong', function(req, res){
+		res.send({'uri':player.getSongURI(hostname)});
+
 	})
 
-	let sentInfo = [];
-	app.get('/getInfo',function(req, res){
-		//testData.push({"dataNum":testData.length})
-		res.send({"data":sentInfo});
+
+
+	/* These calls were used in developement and debugging, they are useful for future dev */
+	app.get('/emptySong.mp3', function(req, res){
+		
+		res.sendFile(__dirname + '/blank.mp3')
 	})
+	app.get('/ready.mp3', function(req, res){
+		
+		res.sendFile(__dirname + '/ready.mp3')
+	})
+
+	// was useful when one of the libraries prevented playing of songs with the same name
+	// so appended a timestamp to songs
+	app.get('/countdown*.mp3', function(req, res){
+		res.sendFile(__dirname + '/countdown.mp3')
+	})
+
 	app.get('/getQueue',function(req, res){
-		//testData.push({"dataNum":testData.length})
 		res.send({"songs":player.songs});
 	})
 
@@ -137,121 +101,36 @@ function start() {
 	app.get('/playCustomSong', function(req, res){
 		console.log(JSON.stringify(req.query.songURL));
 		player.createSong("https://www.youtube.com/watch?v=" + req.query.songURL);
-
-
 		res.send({"info":"added song: " + req.songURL + " to the queue"})
 	});
 
 
 
-	app.get('/getCurrentSong', function(req, res){
-		
-		
-		// playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
-		// playlistFile+=hostname+"blank.mp3" + "\n"
-
-
-		res.send({'uri':player.getSongURI(hostname)});
-
-	})
-
+	
+	// These could be used to create an actual internet radio stream from the songs
+	// It doesnt have the exact syntax expected though, check the Apple M3U standards
+	// I used this early on in dev because i thought i would be using the ESP32's capability
+	// To play internet radio streams. But it turns out this capability was extremely buggy
+	// And it was hard to make a radio stream because you had to chop songs up into constant lengths
 	app.get('/getStream.m3u', function(req, res){
 		
 		let playlistFile = "#EXTM3U\n";
 		playlistFile += player.getSongPlaylist(hostname)
-		// playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
-		// playlistFile+=hostname+"blank.mp3" + "\n"
-
 
 		res.header({ 'Content-Disposition': 'attachment; filename=stream.m3u' }).send(playlistFile);
 
 	})
 	app.get('/getStream.json', function(req, res){
-		
 		let playlistFile = "#EXTM3U\n";
 		playlistFile += player.getSongPlaylist(hostname)
-		// playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
-		// playlistFile+=hostname+"blank.mp3" + "\n"
-
-
 		res.send({ "m3u": playlistFile });
 
 	})
 
-	app.get('/emptySong.mp3', function(req, res){
-		// res.setHeader('Content-Disposition', 'filename=' + "emptySong"+req.params.timestamp + ".mp3");
-		// res.setHeader('Content-Transfer-Encoding', 'binary');
-        // res.setHeader('Content-Type', 'application/mpeg');
-
-		res.sendFile(__dirname + '/blank.mp3')
-	})
-	app.get('/ready.mp3', function(req, res){
-		
-		res.sendFile(__dirname + '/ready.mp3')
-	})
-
-	app.get('/countdown*.mp3', function(req, res){
-		// res.setHeader('Content-Disposition', 'filename=' + "emptySong"+req.params.timestamp + ".mp3");
-		// res.setHeader('Content-Transfer-Encoding', 'binary');
-        // res.setHeader('Content-Type', 'application/mpeg');
-
-		res.sendFile(__dirname + '/countdown.mp3')
-	})
-
-	
-
-	
 
 	server.listen(port);
 
-	//requestHandlers.initializeSockets(io);
-
-
-
 	
-
-	//console.log('Libshout version: ' + nodeshout.getVersion());
-
-
-
-	//getYoutubeMP3(url, playCountdown)
-	
-	
-
-	
-		
-
-	// 	shout.open();
-	// 	var fileStream = new FileReadStream('nodeshout-master/music/test.ogg', 65536),
-	//     shoutStream = fileStream.pipe(new ShoutStream(shout));
-
-	//      fileStream.on('data', function(chunk) {
-	// 	    console.log('Read %d bytes of data', chunk.length);
-	// 	});
-
-	// 	shoutStream.on('finish', function() {
-	// 	    console.log('Finished playing...');
-	// 	    play2();
-	// 	});
-	// }
-
-
-
-		
-
-	   
-
-	
-	
-	
-
-	// Create file read stream and shout stream
-	
-
-	
-
-
-
 	console.log("Server has started on port:" + port);
 }
 

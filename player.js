@@ -1,5 +1,4 @@
-
-// const nodeshout = require("nodeshout-master");
+//Jackson Wheeler
 const Writable = require('stream').Writable;
 const EventEmitter = require('events');
 const fs = require("fs");
@@ -13,67 +12,7 @@ var database = require('./database');
 
 
 database.clearPlaylist();
-//database.createDummyValues();
 
-// database.getPlaylist(function(playlist){
-//     console.log(playlist);
-// })
-// database.setupNextSong(function(){
-//     //database.getData();
-//     database.getDBState();
-
-// })
-// database.clearPlaylist();
-// database.createDummyValues();
-
-// database.getDBState();
-
-// database.setupNextSong(function(){
-//     //database.getData();
-//     console.log("SETTING UP NEXT SONG")
-//     database.getDBState();
-//     database.setActiveSong(function(){
-//         console.log("SETTING UP ACTIVE SONG")
-
-//         // database.getDBState();
-//     })
-// })
-
-function step(){
-    
-    database.getDBState(function(){
-        console.log("___STEP BEGINNING____")
-        database.setupNextSong(function(){
-            database.getDBState(function(){
-                console.log("___STEP MIDDLE____")
-                database.setActiveSong(function(){
-                    database.getDBState(function(){
-                        console.log("___STEP END1___")
-                        database.setupNextSong(function(){
-                            database.getDBState(function(){
-                                console.log("___STEP END2___")
-
-
-
-                            })
-                        })
-
-                    })
-                })
-            })
-        })
-
-        
-    });
-}
-// setTimeout(step,500);
-
-
-
-
-
-
-const segmentSize = 20;//20 seconds segments
 
 function getYoutubeMP3(url, callback){
     let name = "";
@@ -86,16 +25,21 @@ function getYoutubeMP3(url, callback){
 
         //get duration in millis
         duration = (( Number(durationHMS[0]) * 60 + Number(durationHMS[1])) * 60 + Number(durationHMS[2])) * 1000
+        
         //dissallow videos over 10 minutes
         if( duration > 600000 ){
+            
+            //During demo we werent updating the db when we dont like a song
+            //so the db thought everything was all good, and was still displaying that song as active
+            //this statement should work, but is untested
+            database.setActiveAsLastPlayed();
             return;
+            
         }
 
         let timestamp = (new Date().getTime())
-
         let nameIdentifier = 'songs/' + timestamp;
-
-        //,'--postprocessor-args' ,"-ar 48000 -b:a 130K",
+        //download the video into the songs folder, and use ffmpeg to convert to mp3
         youtubedl.exec("https://www.youtube.com/watch?v=" + url, ['-x','--audio-format', 'mp3', '-o', nameIdentifier + '-u.%(ext)s'], {}, 
             function exec (err, outputs) {
                 if (err) {
@@ -105,7 +49,7 @@ function getYoutubeMP3(url, callback){
                 for(output of outputs){
                     if(output.indexOf("Deleting") == 0){
                         if(name != ""){
-                            
+                            //spawn an ffmpeg process to set the correct bitrate (if we dont do this songs are either sped up or slowed down by the ESP32 MP3 decoder)
                             let ffmpeg = spawn('ffmpeg', ['-i', name, '-hide_banner','-loglevel','panic','-ar', '44100','-b:a','120K' , nameIdentifier+'.mp3']);
                             ffmpeg.on('exit', (statusCode) => {
                               if (statusCode === 0) {
@@ -121,12 +65,6 @@ function getYoutubeMP3(url, callback){
                                 console.log('err:', new String(err))
                                 throw "bad ffmpeg conversion"
                               })
-
-
-
-                            
-
-
                         }
                         else{
                             throw "bad video name"
@@ -153,12 +91,7 @@ class Player {
         this.database.setPlayer(this)
         this.stopped = true;
 
-        //this.blank = new SongStream(this.shout, "songs/Green 10 Second Countdown with Male Voice.mp3")
-
-        //this.blank.events.on("finish", this.playNext);
-
-        //this.blank.beginStream();
-        console.log("in player")
+        
         this.database.setupNextSong()
         
     }
@@ -196,13 +129,10 @@ class Player {
         }
     }
 
-    //on
+    
     playNextUp(){
         let self = player;
         
-        
-        
-
         //if another song is ready to go, set it as the active song
         if(this.songs.length){
 
@@ -213,21 +143,15 @@ class Player {
             setTimeout(()=>{this.finishPlaying()}, this.activeSong.duration);
 
 
-            // setTimeout(()=>{this.database.setupNextSong(()=>{this.start()})}, 2500);
-            
-            // setTimeout(()=>{this.start}, 5000);
 
         }
         else{
             console.log("PLAY NEXT UP: the player stopped")
             this.stopped = true;
-            //attempt to load another song 
-            //setTimeout(this.database.setupNextSong, 1000);
+            
         }
-        
 
     }
-    
 
     createSong(song, callback){
 
@@ -235,6 +159,7 @@ class Player {
         console.log("creating a song: " + song.url)
         console.log(song)
         
+        //if this fails, we have not implemented a way to report that to the db
         getYoutubeMP3(song.url,(filepath, duration)=>{
             song.filepath = filepath;
             song.duration = duration;
@@ -250,14 +175,10 @@ class Player {
  
         });
     }
+    //helper function for API calls
+    //if no songs active, play countdown, you can change this to blank for silence instead of counting down
     getSongURI(hostname){
-        //
-        //
-        // playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
-        // playlistFile+=hostname+"blank.mp3" + "\n"
-
        
-
         if(this.activeSong !== undefined){
 
             return hostname + this.activeSong.filepath;
@@ -267,18 +188,10 @@ class Player {
             return hostname + encodeURIComponent("countdown" + (new Date().getTime())+ ".mp3");// + (new Date().getTime()));
         }
 
-        
-
-
-
     }
 
     getSongPlaylist(hostname){
-        //
-        //
-        // playlistFile+=hostname+"Green%2010%20Second%20Countdown%20with%20Male%20Voice.mp3" + "\n"
-        // playlistFile+=hostname+"blank.mp3" + "\n"
-
+        
         let playlistFile = ""
 
         if(this.activeSong !== undefined){
@@ -295,10 +208,9 @@ class Player {
 
     }
 
-    //TODO: make work with database type song
     removeSong(song){
         if(song !== undefined){
-            //just to be extra sure no ones reading the song
+            //just to be extra sure no ones reading the song, wait a bit more
             setTimeout(()=>{
                 fs.unlink( "./" + song.filepath, (err)=>{
                     if(err){
@@ -311,45 +223,11 @@ class Player {
         }
         
     }
-
-
 }
 
 
-class SongStream {
-
-    constructor(filepath, duration, url){
-        
-        this.filepath = filepath
-        this.duration = duration
-        this.url = url
-
-
-    }
-
-    beginStream(){
-        console.log('Starting to play', this.filepath);
-
-
-        
-    }
-
-    endStream(){
-        console.log('Ending playing', this.filepath);
-       
-    }
-
-
-    
-
-   
-
-    
-};
-
 
 let player = new Player(database);
-
 
 
 module.exports = player

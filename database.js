@@ -1,4 +1,8 @@
-
+//Jackson Wheeler
+//Controller for the Firebase Database
+//Pairs with Player
+//must set up database, and pass to player during construction
+//after this, Player calls setupPlayer function to give the db a reference to the player referencing it
 try {
     var firebaseConfig = require('./firebaseConfig');
 }catch(e){
@@ -9,6 +13,7 @@ try {
 var firebase = require('firebase');
 var firebaseApp = firebase.initializeApp(firebaseConfig);
 
+//sort by upvotes, and by seniority
 function sortPlaylist(a, b) {
     var diffVotes = b.count - a.count;
     if (diffVotes !== 0) {
@@ -18,7 +23,7 @@ function sortPlaylist(a, b) {
     return a.addedAt - b.addedAt;
 }
 
-class Database {//datbase controller
+class Database {//firebase database controller
     constructor(){
         this.db = firebase.database();
         this.playlistRef = this.db.ref('playlist/');
@@ -30,7 +35,7 @@ class Database {//datbase controller
         this.activeSong.set({});
         this.lastPlayed.set({});
 
-
+        //if the player has stopped, restart it when a new song is added
         this.playlistRef.on('child_added', (data) => {
             
             if(this.player !== undefined){
@@ -40,30 +45,15 @@ class Database {//datbase controller
                     if(this.player.stopped && upNext === undefined){
                         //init as upNext
                         this.setupNextSong(()=>{
-                            
-                            //this.player.start();
-
-
-
                         })
-
-
                     }
-
                 })
-
-
             }
-
         })
-      
-
         
     }
     setPlayer(player){
         this.player = player;
-
-
 
     }
 
@@ -81,8 +71,7 @@ class Database {//datbase controller
             })
             //sort by highest votes, and then oldest
             playlist.sort(sortPlaylist);
-            // console.log(playlist)
-            // console.log("hello")
+            
             callback(playlist)
         });
         
@@ -103,7 +92,7 @@ class Database {//datbase controller
         })
     }
 
-
+    //calls player.createsong to actually download the song
     setupNextSong(callback=()=>{}, skipUpNext=false){
         if(this.player === undefined){
             console.log("setupNextSong: player not set")
@@ -152,9 +141,6 @@ class Database {//datbase controller
         //set upnext = undefined
         this.getData((activeSong, upNext, prevSong, playlist=[])=>{
             console.log(activeSong, upNext, prevSong, playlist)
-            // console.log("______________")
-            // console.log(activeSong)
-            // console.log("______________")
             
             if(activeSong !== undefined ){
                 
@@ -166,8 +152,6 @@ class Database {//datbase controller
 
                     callback();
                     })
-                
-
             }
             else{
                 if(upNext !== undefined){
@@ -182,12 +166,11 @@ class Database {//datbase controller
 
         })
     }
-
+    //for debugging
+    //It was shrujans firebase, so i couldnt log in to view it
     getDBState(callback=()=>{}){
         this.db.ref().once('value', function(snapshot){
-            // console.log(snapshot.key);
-            // console.log(snapshot.value)
-            // console.log(snapshot);
+            
             snapshot.forEach(function(childSnapshot) {
                 var childKey = childSnapshot.key;
                 var childData = childSnapshot.val();
@@ -198,8 +181,6 @@ class Database {//datbase controller
                     var subChildData = subChildSnapshot.val();
                     console.log("\t" + subChildKey)
                     console.log("\t\t", subChildData)
-                    
-
                 })
                 
             })
@@ -211,9 +192,7 @@ class Database {//datbase controller
         
         this.db.ref().once('value', function(snapshot){
             let activeSong, upNext, prevSong, playlist;
-            // console.log(snapshot.key);
-            // console.log(snapshot.value)
-            // console.log(snapshot);
+           
             snapshot.forEach(function(childSnapshot) {
                 
                 var childKey = childSnapshot.key;
@@ -237,10 +216,6 @@ class Database {//datbase controller
                     })
                 }
 
-               
-
-                
-            
             })
             if(playlist !== undefined){
                 playlist.sort(sortPlaylist);
@@ -255,7 +230,7 @@ class Database {//datbase controller
     createDummyValues(){
         // this.clearPlaylist();
         console.log("creating dummy values")
-        //console.log(this.playlistRef)
+        
         this.playlistRef.push({
             title: "Travis Scott - SICKO MODE ft. Drake",
             url: "6ONRf7h3Mdk",
