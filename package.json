@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@microlink/youtube-dl": "^2.0.0",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "firebase": "^6.1.0",
     "jquery": "^3.3.1"
   },
